@@ -39,12 +39,11 @@ zpressed=false
 xpressed=false
 
 --bird2 var
-bird2_x = 118
-bird2_y = 118
+bird2_x = 100
+bird2_y = 10
 bird2_v = 0
 bird2_spr = 44
 gravity2=0.1
-jump_force2=2
 arrowpressed=false
 
 --main menu title vars
@@ -105,6 +104,7 @@ end
 --resets all gameplay vars
 function reset_game() -- all the variables getting back to their start positions
 	gravity=0.1
+	gravity2=0.1
 	
 	pressed=false
 
@@ -119,8 +119,8 @@ function reset_game() -- all the variables getting back to their start positions
 	bird_y=10
 	bird_v=0
 	bird_spr=12
-	bird2_x=118
-	bird2_y=118
+	bird2_x=100
+	bird2_y=10
 	bird2_v=0
 	bird2_spr = 44
 	
@@ -280,8 +280,8 @@ function game_update() --update during the game
 	
 	end
 
-	bird_move(gravity, jump_force, bird_v, bird_x, bird_y, 4, bird_spr, 12, 14, zpressed) --initializing movement
-	bird_move(gravity2, jump_force2, bird2_v, bird2_x, bird2_y, 2, bird2_spr, 44, 46, arrowpressed)
+	bird_move() --initializing movement
+	bird2_move()
 
 	
 end
@@ -313,26 +313,42 @@ function game_draw()
 
 end
 
-function bird_move(birdgravity, bird_jump_force, birdv, birdx, birdy, btnPress, birdspr, spr_num, spr_num_jump, pressed) 
+function bird_move()
 	
-	birdv+=birdgravity --adding gravity to the bird's velocity
-	birdy+=birdv --bird's y position is getting updated by velocity
-	-- it's technically never moves horizontally
-	-- these if statements are made so you can only press z once and then you have release it to be able to press again
-	if (birdy>=0 and birdy<=128)do
-		if(btn(btnPress,0) and not pressed)do --btn is input checker that expects "z" input, as 4 is preset to "z" key and 0 means 1 player
-			sfx(0)
-			birdv-=bird_jump_force --add jump_force to bird's velocity
-			birdspr=spr_num_jump --changing the sprite
-			pressed=true
-		end
-		
-		if(not btn(btnPress,0))then
-			birdspr=spr_num --changing the sprite back to original
-			pressed=false --resetting pressed so you can press again
-		end
+	bird_v+=gravity
+	bird_y+=bird_v
+	
+	if(btn(4,0) and not pressed)do
+		sfx(0)
+		bird_v-=jump_force
+		bird_spr=14
+		pressed=true
+	end
+	
+	if(not btn(4,0))then
+		bird_spr=12
+		pressed=false
 	end
 
+end
+function bird2_move() 
+	
+	bird2_v+=gravity2
+	bird2_y+=bird2_v
+
+	if(bird2_y>=0 and bird2_y<=128)do
+		if(btn(2,0) and not arrowpressed)do
+			sfx(0)
+			bird2_v-=jump_force
+			bird2_spr=46
+			arrowpressed=true
+		end
+
+		if (not btn(2,0)) then
+			bird2_spr=44
+			arrowpressed=false
+		end
+	end
 end
 -->8
 --menu
@@ -506,22 +522,22 @@ __gfx__
 11bbb77b7bbbbbbbbbbbbbbb3b3333110011bbbbb77b7ebbbbbbbb3b33331100ffffffffffffffffffffffffffffffff11118888888811110011888888881111
 11bbb77b7bbbbbbbbbbbbbbb3b3333110011bbbbb77b7ebbbbbbbb3b33331100ffffffffffffffffffffffffffffffff00001111111100000000111111110000
 11bbb77b7bbbbbbbbbbbbbbb3b3333110011bbbbb77b7ebbbbbbbb3b33331100ffffffffffffffffffffffffffffffff00001111111100000000111111110000
-11bbb77b7bbbbbbbbbbbbbbb3b3333110011bbbbb77b7ebbbbbbbb3b33331100ffffffffffffffffffffffffffffffff00000000000000000000000000000000
-11bbb77b7bbbbbbbbbbbbbbb3b3333110011bbbbb77b7ebbbbbbbb3b33331100ffffffffffffffffffffffffffffffff00000000000000000000000000000000
-11bbb77b7bbbbbbbbbbbbbbb3b3333110011bbbbb77b7ebbbbbbbb3b33331100ffffffffffffffffffffffffffffffff00000000000000000000000000000000
-11bbb77b7bbbbbbbbbbbbbbb3b3333110011bbbbb77b7ebbbbbbbb3b33331100ffffffffffffffffffffffffffffffff00000000000000000000000000000000
-11bbb77b7bbbbbbbbbbbbbbb3b3333110011bbbbb77b7ebbbbbbbb3b33331100ffffffffffffffffffffffffffffffff00000000000000000000000000000000
-11bbb77b7bbbbbbbbbbbbbbb3b3333110011bbbbb77b7ebbbbbbbb3b33331100ffffffffffffffffffffffffffffffff00000000000000000000000000000000
-11bbb77b7bbbbbbbbbbbbbbb3b3333110011bbbbb77b7ebbbbbbbb3b33331100ffffffffffffffffffffffffffffffff00000000000000000000000000000000
-111111111111111111111111111111110011bbbbb77b7ebbbbbbbb3b33331100ffffffffffffffffffffffffffffffff00000000000000000000000000000000
-111111111111111111111111111111110011bbbbb77b7ebbbbbbbb3b33331100ffffffffffffffffffffffffffffffff00000000000000000000000000000000
-000000000000000000000000000000000011bbbbb77b7ebbbbbbbb3b33331100ffffffffffffffffffffffffffffffff00000000000000000000000000000000
-000000000000000000000000000000000011bbbbb77b7ebbbbbbbb3b33331100ffffffffffffffffffffffffffffffff00000000000000000000000000000000
-000000000000000000000000000000000011bbbbb77b7ebbbbbbbb3b33331100ffffffffffffffffffffffffffffffff00000000000000000000000000000000
-000000000000000000000000000000000011bbbbb77b7ebbbbbbbb3b33331100ffffffffffffffffffffffffffffffff00000000000000000000000000000000
-000000000000000000000000000000000011bbbbb77b7ebbbbbbbb3b33331100ffffffffffffffffffffffffffffffff00000000000000000000000000000000
-000000000000000000000000000000000011bbbbb77b7ebbbbbbbb3b33331100ffffffffffffffffffffffffffffffff00000000000000000000000000000000
-000000000000000000000000000000000011bbbbb77b7ebbbbbbbb3b33331100ffffffffffffffffffffffffffffffff00000000000000000000000000000000
+11bbb77b7bbbbbbbbbbbbbbb3b3333110011bbbbb77b7ebbbbbbbb3b33331100ffffffffffffffffffffffffffffffff00001111110000000000111111000000
+11bbb77b7bbbbbbbbbbbbbbb3b3333110011bbbbb77b7ebbbbbbbb3b33331100ffffffffffffffffffffffffffffffff00001111110000000000111111000000
+11bbb77b7bbbbbbbbbbbbbbb3b3333110011bbbbb77b7ebbbbbbbb3b33331100ffffffffffffffffffffffffffffffff0011eeee221100000011eeee22110000
+11bbb77b7bbbbbbbbbbbbbbb3b3333110011bbbbb77b7ebbbbbbbb3b33331100ffffffffffffffffffffffffffffffff0011eeee221100000011eeee22110000
+11bbb77b7bbbbbbbbbbbbbbb3b3333110011bbbbb77b7ebbbbbbbb3b33331100ffffffffffffffffffffffffffffffff7777eeeeee2211007777eeeeee221100
+11bbb77b7bbbbbbbbbbbbbbb3b3333110011bbbbb77b7ebbbbbbbb3b33331100ffffffffffffffffffffffffffffffff7777eeeeee2211007777eeeeee221100
+11bbb77b7bbbbbbbbbbbbbbb3b3333110011bbbbb77b7ebbbbbbbb3b33331100ffffffffffffffffffffffffffffffff1177eeeeeeee11001177eeeeeeee1111
+111111111111111111111111111111110011bbbbb77b7ebbbbbbbb3b33331100ffffffffffffffffffffffffffffffff1177eeeeeeee11001177eeeeeeee1111
+111111111111111111111111111111110011bbbbb77b7ebbbbbbbb3b33331100ffffffffffffffffffffffffffffffff1111eeeeee1111111111eeeeee111122
+000000000000000000000000000000000011bbbbb77b7ebbbbbbbb3b33331100ffffffffffffffffffffffffffffffff1111eeeeee1111111111eeeeee111122
+000000000000000000000000000000000011bbbbb77b7ebbbbbbbb3b33331100ffffffffffffffffffffffffffffffff999911eeee11ee22999911eeee11eeee
+000000000000000000000000000000000011bbbbb77b7ebbbbbbbb3b33331100ffffffffffffffffffffffffffffffff999911eeee11ee22999911eeee11eeee
+000000000000000000000000000000000011bbbbb77b7ebbbbbbbb3b33331100ffffffffffffffffffffffffffffffff1111eeeeeeee11111111eeeeeeee1100
+000000000000000000000000000000000011bbbbb77b7ebbbbbbbb3b33331100ffffffffffffffffffffffffffffffff1111eeeeeeee11111111eeeeeeee1100
+000000000000000000000000000000000011bbbbb77b7ebbbbbbbb3b33331100ffffffffffffffffffffffffffffffff00001111111100000000111111110000
+000000000000000000000000000000000011bbbbb77b7ebbbbbbbb3b33331100ffffffffffffffffffffffffffffffff00001111111100000000111111110000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000777777777000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000077777777777770000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
