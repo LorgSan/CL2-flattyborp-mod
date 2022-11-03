@@ -28,7 +28,7 @@ hills={}
 hill_num=3
 hill_v=0.7
 
---bullet vars
+-- MOD bullet vars
 bullets={}
 bullets2={}
 
@@ -42,7 +42,7 @@ jump_force=2
 zpressed=false
 xpressed=false
 
---bird2 var
+-- MOD bird2 var
 bird2_x = 100
 bird2_y = 10
 bird2_v = 0
@@ -74,9 +74,6 @@ redwin = false
 --run once at start
 function _init() --basically start in unity
 	--make all "objects" --creating objects, but it doesn't draw it yet
-	-- for i=0,tube_num do
-	-- 	add_tube(tubes_x+i*offset)
-	-- end
 	for i=0,ground_num do
 		add_ground(i*32)
 	end
@@ -139,14 +136,7 @@ function reset_game() -- all the variables getting back to their start positions
 	t_count=0
 	bullets={}
 	bullets2={}
-	--bugfix: reset tube table.
- 	-- tubes = {}
- 
-	 --adds new tubes to table/spawns them.   
-    -- for i=0,tube_num do
-    --     add_tube(tubes_x+i*offset)
-    --     --adds 3 at x position plus offset times number of tubes.
-    -- end
+
 	state="game"
 	
 end
@@ -176,48 +166,6 @@ function add_hill(_x)
 	})
 end
 
--- --make tube obj
--- function add_tube(_x)
--- 	add(tubes,{
--- 		x=_x,
--- 		y=tubes_y+rnd(50),
--- 		hit_w=32,
--- 		hit_h=32
--- 	})
--- end
-
---draw tube obj
--- function draw_tube(_t) -- -t is the tube "object" that we're operating with
--- 	for i=0,2 do
--- 		spr(4,_t.x,_t.y+(i*32),4,4)
--- 		_last_y=_t.y+(i*32)
--- 	end
--- -- 164~172 makes sure that there are gaps between the tubes
---  spr(0,_t.x,_last_y+24,4,4)
- 	
---  for i=0,2 do
---  	spr(4,_t.x,_last_y+gap+32+(i*32),4,4)
---  end
- 
---  spr(0,_t.x,_last_y+24+gap,4,4)
-
--- end
-
---check col b/t bird and tube --!!!
--- function overlap(_t)
--- 	if(bird_x+8>=_t.x and
--- 		bird_x<=_t.x+_t.hit_w and
--- 		bird_y+8>=0 and
--- 		bird_y<=_t.y+(3*_t.hit_h))then
--- 		return true
--- 	end
---     if(bird_x+8>=_t.x and
---         bird_x<=_t.x+_t.hit_w and
---         bird_y+8>=_t.y+(3*_t.hit_h)+gap)then
--- 		return true
--- 	end
--- end
-
 function b_overlap(bullet)
 	if(bullet.x>=bird2_x and
 				bullet.x<=bird2_x+bird_hit_w and
@@ -227,7 +175,8 @@ function b_overlap(bullet)
 	end
 end
 
-function b_overlap2(bullet)
+function b_overlap2(bullet) -- MOD overlap check for the second set of bullets 
+-- MOD I had the most problems with the bird being not a object exaclty here and in the move funcyion :()
 	if(bullet.x>=bird_x and
 				bullet.x<=bird_x+bird_hit_w and
 				bullet.y>=bird_y and
@@ -245,28 +194,6 @@ end
 --game state
 
 function game_update() --update during the game
-	-- checks all the tubes and if there are any overlap play crush sound effect and change state to the end
-	-- for t in all(tubes) do
-	-- 	if(overlap(t))then
-	-- 		sfx(1)
-	-- 		state="end"		
-	-- 	end
-		
-		-- t.x-=tube_v --it's updating the x position based on the velocity and immitates parrallax this way
-		
-		-- if(t.x<-32)then --adding new tubes and deleting old ones
-		-- 	temp=t
-		-- 	t.x=tubes[tube_num+1].x+offset
-		-- 	del(tubes,t)
-		-- 	add(tubes,temp)
-		-- end
-		
-	-- 	if(bird_x==t.x)then --if the bird is the same as x position of the current tube add to the score
-	-- 		sfx(3)
-	-- 		score+=1
-	-- 	end
-	
-	-- end
 	
 	for g in all(ground) do --adding new ground and deleting old one
 		g.x-=ground_v
@@ -305,7 +232,7 @@ function game_update() --update during the game
 	end
 
 	bird_move() --initializing movement
-	bird2_move()
+	bird2_move() -- MOD initializing movemvent for the second borp....  qwq
 		
 		
 	if(bird_y > 125)then
@@ -315,7 +242,7 @@ function game_update() --update during the game
 	end
 	if (bird2_y > 125) then
 		sfx(1)
-		redwin = true
+		redwin = true -- MOD if the second borp has fallen the red one wins!
 		state="end"
 	end
 	
@@ -323,7 +250,7 @@ function game_update() --update during the game
 		add_bullet(bird_x+8,bird_y+4)
 	end
 	if(btnp(0,0))then
-		add_bullet2(bird2_x-8, bird2_y-4)
+		add_bullet2(bird2_x-8, bird2_y-4) -- MOD input check and I'm placing them invertly next to the second borp
 	end
 	
 	for b in all(bullets)do
@@ -334,8 +261,8 @@ function game_update() --update during the game
 			end
 		end
 
-	for b2 in all(bullets2)do
-		b2.x-=b2.v
+	for b2 in all(bullets2)do -- MOD new check for the pink borps bullets qwq
+		b2.x-=b2.v -- MOD I invert v here so that it sends the bullets in the direciton of the first bird:)
 		if(b_overlap2(b2))do
 				redwin = false
 				state="end"
@@ -369,8 +296,8 @@ function game_draw()
 	for b in all(bullets) do
 		circfill(b.x,b.y,1,8)
 	end
-	for b2 in all(bullets2) do
-		circfill(b2.x,b2.y,1,8)
+	for b2 in all(bullets2) do 
+		circfill(b2.x,b2.y,1,14) --drawing pink borp's bullets and I made them pink like it's feathers!
 	end
 	-- draws a bird
 	spr(bird_spr,bird_x,bird_y,2,2)
@@ -400,7 +327,7 @@ function bird_move()
 	end
 
 end
-function bird2_move() 
+function bird2_move()  -- MOD moving function for the second bird
 	
 	bird2_v+=gravity2
 	bird2_y+=bird2_v
@@ -428,7 +355,7 @@ function add_bullet(_x,_y)
 		v=2
 	})
 end
-function add_bullet2(_x,_y)
+function add_bullet2(_x,_y) -- MOD a function that adds bullets into a second array qwq
 	add(bullets2,{
 		x=_x,
 		y=_y,
@@ -523,7 +450,7 @@ end
 
 function end_update()
 	
-	if (redwin == true)then
+	if (redwin == true)then -- MOD plays different animation based on who won
 		bounce_back2() --perform a graphical event on the bird
 	else bounce_back()
 	end
@@ -552,7 +479,7 @@ function end_draw()
 	--draws sprite for end over
 	spr(224,29,end_y,9,2)
 	-- and prints all the info based on the time that has passed from the end of the game
-	if (redwin == true)then
+	if (redwin == true)then -- MOD that check helps me put out correct information on how has won
 		if(end_time>35)then
 			print("Red Flatty Borp won!",28,50,8)
 		end
@@ -586,7 +513,7 @@ function bounce_back()
 	end
 end
 
-function bounce_back2()
+function bounce_back2() -- MOD a second function for the second bird with inverted values
 	
 	if(bird2_y<128)then --this is a grpahical effect of yeeting the bird away, 128 is a top of the screen
 		gravity2=1.5
