@@ -32,8 +32,6 @@ pressed=false
 
 --bullet vars
 bullets={}
-bullet_num=128 --total number of bullets on the screen
-bullet_ind=1 --index
 
 --main menu title vars
 title_y=27
@@ -64,9 +62,6 @@ function _init()
 	for i=0,hill_num do
 		add_hill(i*128)
 	end
-	for i=0, bullet_num do
-	add_bullet()
-end
 end
 
 --runs every frame
@@ -248,23 +243,18 @@ function game_update()
 	end
 	
 	if(btnp(2,0))then
-		--add_bullet(bird_x+8,bird_y+4)
-		bird_shoot(bird_x, bird_y)
+		add_bullet(bird_x+8,bird_y+4)
 	end
 	
 	for b in all(bullets)do
-		if (b.visible) then
-			b.x+=b.v
-			for t in all(tubes)do
-				if(b_overlap(b,t))do
-					t.alive=false
-				end
+		b.x+=b.v
+		for t in all(tubes)do
+			if(b_overlap(b,t))do
+				t.alive=false
 			end
-		if (b.x > 128) then
-		b.visible = false;
 		end
 	end
-end
+	
 end
 
 function game_draw()
@@ -290,9 +280,7 @@ function game_draw()
 	end
 	
 	for b in all(bullets) do
-		if (b.visible) then
-			circfill(b.x,b.y,1,8)
-		end
+		circfill(b.x,b.y,1,8)
 	end
 		
 	spr(bird_spr,bird_x,bird_y,2,2)
@@ -320,27 +308,11 @@ function bird_move()
 
 end
 
-function bird_shoot(_x, _y)
-	--set new bullet's position
-	bullets[bullet_ind].x = _x+8
-	bullets[bullet_ind].y = _y+8
-	bullets[bullet_ind].visible = true;
-
-	--increase the index of bullets
-	bullet_ind+=1
-
-	--reset bullet if we're at limit
-	if (bullet_ind >= bullet_num)do
-		bullet_ind=1
-	end
-end
-
-function add_bullet()
+function add_bullet(_x,_y)
 	add(bullets,{
-		x=-10,
-		y=-10,
-		v=2,
-		visible=false
+		x=_x,
+		y=_y,
+		v=2
 	})
 end
 -->8

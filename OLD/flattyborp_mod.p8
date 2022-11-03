@@ -28,6 +28,10 @@ hills={}
 hill_num=3
 hill_v=0.7
 
+--bullet vars
+bullets={}
+bullets2={}
+
 --bird vars
 bird_x=10
 bird_y=10
@@ -46,6 +50,9 @@ bird2_spr = 44
 gravity2=0.1
 arrowpressed=false
 
+bird_hit_w = 16
+bird_hit_h = 16
+
 --main menu title vars
 title_y=27
 title_tar=30
@@ -61,6 +68,8 @@ score=0
 best=0
 
 state="menu"
+
+redwin = false
 
 --run once at start
 function _init() --basically start in unity
@@ -128,6 +137,8 @@ function reset_game() -- all the variables getting back to their start positions
 	end_y=-12
 	end_tar=22	
 	t_count=0
+	bullets={}
+	bullets2={}
 	--bugfix: reset tube table.
  	-- tubes = {}
  
@@ -207,6 +218,25 @@ end
 -- 	end
 -- end
 
+function b_overlap(bullet)
+	if(bullet.x>=bird2_x and
+				bullet.x<=bird2_x+bird_hit_w and
+				bullet.y>=bird2_y and
+				bullet.y<=bird2_y+bird_hit_h)then
+		return true
+	end
+end
+
+function b_overlap2(bullet)
+	if(bullet.x>=bird_x and
+				bullet.x<=bird_x+bird_hit_w and
+				bullet.y>=bird_y and
+				bullet.y<=bird_y+bird_hit_h)then
+		return true
+	end
+end
+
+
 --gen lerp func for juice --title lerping between two points
 function lerp(pos,tar,p) --gets a starting position, target position and uses rate to accelerate it, p for percent 
 	return(1-p)*tar+p*pos --(1-p) i think smoothes out the movement 
@@ -239,12 +269,6 @@ function game_update() --update during the game
 	-- end
 	
 	for g in all(ground) do --adding new ground and deleting old one
-		
-		if(bird_y >= g.y)then
-			sfx(1)
-			state="end"	
-		end
-
 		g.x-=ground_v
 		
 		if(g.x<-32)then
@@ -282,6 +306,42 @@ function game_update() --update during the game
 
 	bird_move() --initializing movement
 	bird2_move()
+		
+		
+	if(bird_y > 125)then
+		sfx(1)
+		redwin = false
+		state="end"		
+	end
+	if (bird2_y > 125) then
+		sfx(1)
+		redwin = true
+		state="end"
+	end
+	
+	if(btnp(5,0))then
+		add_bullet(bird_x+8,bird_y+4)
+	end
+	if(btnp(0,0))then
+		add_bullet2(bird2_x-8, bird2_y-4)
+	end
+	
+	for b in all(bullets)do
+		b.x+=b.v
+		if(b_overlap(b))do
+				redwin = true
+				state="end"
+			end
+		end
+
+	for b2 in all(bullets2)do
+		b2.x-=b2.v
+		if(b_overlap2(b2))do
+				redwin = false
+				state="end"
+			end
+		end
+
 
 	
 end
@@ -305,6 +365,13 @@ function game_draw()
 	for g in all(ground) do
 		spr(8,g.x,g.y,4,4)
 	end
+
+	for b in all(bullets) do
+		circfill(b.x,b.y,1,8)
+	end
+	for b2 in all(bullets2) do
+		circfill(b2.x,b2.y,1,8)
+	end
 	-- draws a bird
 	spr(bird_spr,bird_x,bird_y,2,2)
 	spr(bird2_spr, bird2_x, bird2_y, 2,2) -- MOD: adds a second bird to the screen
@@ -318,16 +385,18 @@ function bird_move()
 	bird_v+=gravity
 	bird_y+=bird_v
 	
-	if(btn(4,0) and not pressed)do
-		sfx(0)
-		bird_v-=jump_force
-		bird_spr=14
-		pressed=true
-	end
-	
-	if(not btn(4,0))then
-		bird_spr=12
-		pressed=false
+	if(bird_y>=0 and bird_y<=128)do
+		if(btn(4,0) and not pressed)do
+			sfx(0)
+			bird_v-=jump_force
+			bird_spr=14
+			pressed=true
+		end
+		
+		if(not btn(4,0))then
+			bird_spr=12
+			pressed=false
+		end
 	end
 
 end
@@ -352,6 +421,20 @@ function bird2_move()
 end
 -->8
 --menu
+function add_bullet(_x,_y)
+	add(bullets,{
+		x=_x,
+		y=_y,
+		v=2
+	})
+end
+function add_bullet2(_x,_y)
+	add(bullets2,{
+		x=_x,
+		y=_y,
+		v=2
+	})
+end
 
 function menu_update()
 	--moving all the objects in the menu 
@@ -440,18 +523,20 @@ end
 
 function end_update()
 	
-	bounce_back() --perform a graphical event on the bird
-	
+	if (redwin == true)then
+		bounce_back2() --perform a graphical event on the bird
+	else bounce_back()
+	end
 	end_time+=1 --initiating the timer to print score rows one by one
 	
 	end_sfx() --muusic!
 
-	if(btn(5,0) and not xpressed)do -- BUG! X can be pressed repeatedly - FIXED
+	if(btn(1,0) and not xpressed)do -- BUG! X can be pressed repeatedly - FIXED
 		xpressed = true
 		reset_game() -- expect game to be reset with x
 	end
 
-	if(not btn(5,0)) then
+	if(not btn(1,0)) then
 		xpressed = false
 	end
 	
@@ -467,16 +552,26 @@ function end_draw()
 	--draws sprite for end over
 	spr(224,29,end_y,9,2)
 	-- and prints all the info based on the time that has passed from the end of the game
-	if(end_time>35)then
-		print("score: "..score.."",45,50,0)
-	end
-	
-	if(end_time>50)then
-			print("best: "..best.."",47,60,0)
+	if (redwin == true)then
+		if(end_time>35)then
+			print("Red Flatty Borp won!",28,50,8)
+		end
+		
+		if(end_time>50)then
+				print("RIP pink borp!",38,60,14)
+		end
+	else 
+		if(end_time>35)then
+			print("Pink Flatty Borp won!",28,50,14)
+		end
+		
+		if(end_time>50)then
+				print("RIP red borp!",38,60,8)
+		end
 	end
 	
 	if(end_time>65)then
-			print("x to restart",38,80,0)
+			print("-> to restart",38,80,0)
 	end
 
 end
@@ -489,9 +584,16 @@ function bounce_back()
 		bird_x-=2+rnd(4)
 		bird_y+=bird_v
 	end
+end
 
+function bounce_back2()
 	
-
+	if(bird2_y<128)then --this is a grpahical effect of yeeting the bird away, 128 is a top of the screen
+		gravity2=1.5
+		bird2_v+=gravity2
+		bird2_x+=2+rnd(4)
+		bird2_y-=bird2_v
+	end
 end
 
 function end_sfx() --plays different sounds at specific times in the end
